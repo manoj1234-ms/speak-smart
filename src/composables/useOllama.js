@@ -12,25 +12,29 @@ const setOllamaConfig = (url, model) => {
     localStorage.setItem('ollama_model', model);
 };
 
-// Try Ollama on any device — works on PC if OLLAMA_ORIGINS is set on Ollama
-// Silently fails on mobile/remote devices without Ollama
+// Ollama only works when app is open on localhost
+// On Vercel/hosted domains, CORS prevents reaching localhost:11434
+const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
 const checkOllamaStatus = async () => {
+    if (!isLocalhost) return false; // Skip silently on hosted domains
     try {
         const response = await fetch(`${ollamaUrl.value}/api/tags`, { signal: AbortSignal.timeout(2000) });
         return response.ok;
     } catch {
-        return false; // Silently fail — no CORS error shown
+        return false;
     }
 };
 
 const getAvailableModels = async () => {
+    if (!isLocalhost) return []; // Skip on Vercel — no CORS error
     try {
         const response = await fetch(`${ollamaUrl.value}/api/tags`, { signal: AbortSignal.timeout(2000) });
         if (!response.ok) return [];
         const data = await response.json();
         return data.models || [];
     } catch {
-        return []; // Silently fail — Ollama not available on this device
+        return [];
     }
 };
 
