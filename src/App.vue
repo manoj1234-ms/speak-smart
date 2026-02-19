@@ -123,10 +123,19 @@ const currentMode = ref('english');
 const streak = ref(1); // Mock streak
 const mobileMenuOpen = ref(false);
 
-// Inputs for API keys
-const inputGemini = ref(localStorage.getItem('gemini_api_key') || '');
+// API keys: priority = localStorage (user-entered) → Vercel env var → empty
+// To pre-configure: add VITE_GEMINI_API_KEY and VITE_OPENROUTER_API_KEY in Vercel dashboard
+const inputGemini = ref(
+  localStorage.getItem('gemini_api_key') || 
+  import.meta.env.VITE_GEMINI_API_KEY || 
+  ''
+);
 const inputGeminiModel = ref(localStorage.getItem('gemini_model') || 'gemini-2.5-flash');
-const inputOpenRouter = ref(localStorage.getItem('openrouter_api_key') || '');
+const inputOpenRouter = ref(
+  localStorage.getItem('openrouter_api_key') || 
+  import.meta.env.VITE_OPENROUTER_API_KEY || 
+  ''
+);
 const inputOpenRouterModel = ref(localStorage.getItem('openrouter_model') || 'meta-llama/llama-3.3-70b-instruct:free');
 const inputOllamaUrl = ref(localStorage.getItem('ollama_url') || 'http://localhost:11434');
 const inputOllamaModel = ref(localStorage.getItem('ollama_model') || 'llama3');
