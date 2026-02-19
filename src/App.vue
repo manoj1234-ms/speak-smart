@@ -68,21 +68,53 @@
              </div>
           </div>
           
-          <div class="input-group">
+           <div class="input-group">
              <label>Local AI (Ollama)</label>
              <div class="row">
                <input v-model="inputOllamaUrl" type="text" placeholder="URL (Default: http://localhost:11434)" class="api-input" />
                <select v-model="inputOllamaModel" class="api-input model-select">
-                 <option v-for="m in availableOllamaModels" :key="m.name" :value="m.name">
-                   {{ m.name }} ({{ (m.size / (1024*1024*1024)).toFixed(1) }}GB)
-                 </option>
-                 <option v-if="availableOllamaModels.length === 0" value="llama3">llama3 (Default)</option>
+                 <!-- Live models from Ollama (when CORS works / on localhost) -->
+                 <template v-if="availableOllamaModels.length > 0">
+                   <option v-for="m in availableOllamaModels" :key="m.name" :value="m.name">
+                     {{ m.name }} ({{ (m.size / (1024*1024*1024)).toFixed(1) }}GB)
+                   </option>
+                 </template>
+                 <!-- Popular preset models (fallback when CORS blocks fetch) -->
+                 <template v-else>
+                   <optgroup label="⭐ Popular Models">
+                     <option value="llama3.1:latest">llama3.1 (Latest)</option>
+                     <option value="llama3:latest">llama3 (Stable)</option>
+                     <option value="llama3.2:latest">llama3.2</option>
+                     <option value="mistral:latest">Mistral 7B</option>
+                     <option value="mistral-nemo:latest">Mistral Nemo</option>
+                     <option value="gemma3:latest">Gemma 3</option>
+                     <option value="gemma2:latest">Gemma 2</option>
+                     <option value="phi4:latest">Phi-4</option>
+                     <option value="phi3:latest">Phi-3</option>
+                     <option value="qwen2.5:latest">Qwen 2.5</option>
+                   </optgroup>
+                   <optgroup label="💻 Coding Models">
+                     <option value="deepseek-coder-v2:latest">DeepSeek Coder V2</option>
+                     <option value="deepseek-coder:6.7b">DeepSeek Coder 6.7B</option>
+                     <option value="codellama:latest">Code Llama</option>
+                     <option value="codegemma:latest">Code Gemma</option>
+                   </optgroup>
+                 </template>
                </select>
              </div>
+             <!-- Custom model name input -->
+             <input 
+               v-model="inputOllamaModel" 
+               type="text" 
+               placeholder="Or type model name: e.g. llama3.1:latest" 
+               class="api-input" 
+               style="margin-top: 0.35rem; font-size: 0.8rem;"
+             />
              <p class="ollama-status" :class="{ online: ollamaOnline }">
                {{ ollamaOnline ? '✅ Ollama detected' : '❌ Ollama not found (Ensure it is running)' }}
              </p>
           </div>
+
         </div>
 
         <button class="btn btn-primary" @click="saveKey">Start Learning</button>
