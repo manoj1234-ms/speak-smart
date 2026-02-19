@@ -1,0 +1,62 @@
+[
+    {
+        "id": 1,
+        "title": "Reverse Linked List",
+        "difficulty": "Easy",
+        "description": "Given the head of a singly linked list, reverse the list, and return the reversed list.",
+        "starterCode": {
+            "javascript": "class ListNode {\n    constructor(val=0, next=null) { this.val = val; this.next = next; }\n}\n\n/**\n * @param {ListNode} head\n * @return {ListNode}\n */\nfunction reverseList(head) {\n    // Write your code here\n    return head;\n}\n\n// --- Test Driver ---\nfunction printList(head) {\n    let res = [];\n    while (head) {\n        res.push(head.val);\n        head = head.next;\n    }\n    console.log('[' + res.join(',') + ']');\n}\n\n// Test Case: [1,2,3,4,5]\nlet head = new ListNode(1, new ListNode(2, new ListNode(3, new ListNode(4, new ListNode(5)))));\nconsole.log('Original:');\nprintList(head);\nconsole.log('Reversed:');\nlet newHead = reverseList(head);\nprintList(newHead);",
+            "python": "class ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\n\ndef reverseList(head):\n    # Write your code here\n    return head\n\n# --- Test Driver ---\ndef printList(head):\n    res = []\n    curr = head\n    while curr:\n        res.append(str(curr.val))\n        curr = curr.next\n    print('[' + ','.join(res) + ']')\n\n# Test Case: [1,2,3,4,5]\nhead = ListNode(1, ListNode(2, ListNode(3, ListNode(4, ListNode(5)))))\nprint('Original:')\nprintList(head)\nprint('Reversed:')\nnewHead = reverseList(head)\nprintList(newHead)",
+            "cpp": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nstruct ListNode {\n    int val;\n    ListNode *next;\n    ListNode() : val(0), next(nullptr) {}\n    ListNode(int x) : val(x), next(nullptr) {}\n    ListNode(int x, ListNode *next) : val(x), next(next) {}\n};\n\nclass Solution {\npublic:\n    ListNode* reverseList(ListNode* head) {\n        // Write your code here\n        return head;\n    }\n};\n\n// --- Test Driver ---\nvoid printList(ListNode* head) {\n    cout << \"[\";\n    while (head) {\n        cout << head->val;\n        if (head->next) cout << \",\";\n        head = head->next;\n    }\n    cout << \"]\" << endl;\n}\n\nint main() {\n    ListNode* head = new ListNode(1, new ListNode(2, new ListNode(3, new ListNode(4, new ListNode(5)))));\n    cout << \"Original:\" << endl;\n    printList(head);\n    \n    Solution s;\n    ListNode* newHead = s.reverseList(head);\n    \n    cout << \"Reversed:\" << endl;\n    printList(newHead);\n    return 0;\n}"
+        },
+        "testCases": []
+    },
+    {
+        "id": 2,
+        "title": "Two Sum",
+        "difficulty": "Easy",
+        "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+        "starterCode": {
+            "javascript": "/**\n * @param {number[]} nums\n * @param {number} target\n * @return {number[]}\n */\nfunction twoSum(nums, target) {\n    // Write your code here\n    return [];\n}\n\n// --- Test Driver ---\nconsole.log(\"Test Case: nums = [2,7,11,15], target = 9\");\nconsole.log(\"Result:\", twoSum([2,7,11,15], 9));",
+            "python": "def twoSum(nums, target):\n    # Write your code here\n    return []\n\n# --- Test Driver ---\nprint(\"Test Case: nums = [2,7,11,15], target = 9\")\nprint(\"Result:\", twoSum([2,7,11,15], 9))",
+            "cpp": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        // Write your code here\n        return {};\n    }\n};\n\n// --- Test Driver ---\nint main() {\n    Solution s;\n    vector<int> nums = {2,7,11,15};\n    int target = 9;\n    \n    cout << \"Test Case: nums = [2,7,11,15], target = 9\" << endl;\n    vector<int> result = s.twoSum(nums, target);\n    \n    cout << \"Result: [ \";\n    for(int x : result) cout << x << \" \";\n    cout << \"]\" << endl;\n    return 0;\n}"
+        },
+        "testCases": []
+    },
+    {
+        "id": 3,
+        "title": "Longest Substring Without Repeating Characters",
+        "difficulty": "Medium",
+        "description": "Given a string s, find the length of the longest substring without repeating characters.",
+        "starterCode": {
+            "javascript": "/**\n * @param {string} s\n * @return {number}\n */\nfunction lengthOfLongestSubstring(s) {\n    // Write your code here\n    return 0;\n}\n\n// --- Test Driver ---\nconsole.log(\"Test Case: 'abcabcbb'\");\nconsole.log(\"Result:\", lengthOfLongestSubstring(\"abcabcbb\"));",
+            "python": "def lengthOfLongestSubstring(s):\n    # Write your code here\n    return 0\n\n# --- Test Driver ---\nprint(\"Test Case: 'abcabcbb'\")\nprint(\"Result:\", lengthOfLongestSubstring(\"abcabcbb\"))",
+            "cpp": "#include <iostream>\n#include <string>\n#include <vector>\n#include <unordered_set>\nusing namespace std;\n\nclass Solution {\npublic:\n    int lengthOfLongestSubstring(string s) {\n        // Write your code here\n        return 0;\n    }\n};\n\n// --- Test Driver ---\nint main() {\n    Solution s;\n    string input = \"abcabcbb\";\n    cout << \"Test Case: 'abcabcbb'\" << endl;\n    cout << \"Result: \" << s.lengthOfLongestSubstring(input) << endl;\n    return 0;\n}"
+        },
+        "testCases": []
+    },
+    {
+        "id": 4,
+        "title": "Merge Intervals",
+        "difficulty": "Medium",
+        "description": "Given an array of intervals where intervals[i] = [start, end], merge all overlapping intervals.",
+        "starterCode": {
+            "javascript": "/**\n * @param {number[][]} intervals\n * @return {number[][]}\n */\nfunction merge(intervals) {\n    // Write your code here\n    return intervals;\n}\n\n// --- Test Driver ---\nconsole.log(\"Test Case: [[1,3],[2,6],[8,10],[15,18]]\");\nconsole.log(\"Result:\", JSON.stringify(merge([[1,3],[2,6],[8,10],[15,18]])));",
+            "python": "def merge(intervals):\n    # Write your code here\n    return intervals\n\n# --- Test Driver ---\nprint(\"Test Case: [[1,3],[2,6],[8,10],[15,18]]\")\nprint(\"Result:\", merge([[1,3],[2,6],[8,10],[15,18]]))",
+            "cpp": "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nclass Solution {\npublic:\n    vector<vector<int>> merge(vector<vector<int>>& intervals) {\n        // Write your code here\n        return intervals;\n    }\n};\n\n// --- Test Driver ---\nint main() {\n    Solution s;\n    vector<vector<int>> intervals = {{1,3},{2,6},{8,10},{15,18}};\n    \n    vector<vector<int>> result = s.merge(intervals);\n    \n    cout << \"Result: [ \";\n    for(auto& i : result) cout << \"[\" << i[0] << \",\" << i[1] << \"] \";\n    cout << \"]\" << endl;\n    return 0;\n}"
+        },
+        "testCases": []
+    },
+    {
+        "id": 5,
+        "title": "Median of Two Sorted Arrays",
+        "difficulty": "Hard",
+        "description": "Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.",
+        "starterCode": {
+            "javascript": "/**\n * @param {number[]} nums1\n * @param {number[]} nums2\n * @return {number}\n */\nfunction findMedianSortedArrays(nums1, nums2) {\n    // Write your code here\n    return 0.0;\n}\n\n// --- Test Driver ---\nconsole.log(\"Test Case: nums1=[1,3], nums2=[2]\");\nconsole.log(\"Result:\", findMedianSortedArrays([1,3], [2]));",
+            "python": "def findMedianSortedArrays(nums1, nums2):\n    # Write your code here\n    return 0.0\n\n# --- Test Driver ---\nprint(\"Test Case: nums1=[1,3], nums2=[2]\")\nprint(\"Result:\", findMedianSortedArrays([1,3], [2]))",
+            "cpp": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {\n        // Write your code here\n        return 0.0;\n    }\n};\n\n// --- Test Driver ---\nint main() {\n    Solution s;\n    vector<int> n1 = {1,3};\n    vector<int> n2 = {2};\n    \n    cout << \"Result: \" << s.findMedianSortedArrays(n1, n2) << endl;\n    return 0;\n}"
+        },
+        "testCases": []
+    }
+]
