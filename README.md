@@ -21,14 +21,15 @@
 ## ✨ Features
 
 ### 🗣️ English Mode
-- **Real-time Speech Recognition** — Speak into your mic, SpeakSmart transcribes it instantly.
+- **Real-time Speech Recognition** — Speak into your mic, SpeakSmart transcribes it instantly. Supports 10+ Indian languages (Hindi, Bengali, etc.) for cross-language practice.
 - **AI Conversation Partner** — Practice with an AI tutor that responds naturally and corrects your grammar.
+- **Multilingual Support** — Speak in your native language (Hindi, etc.) and let AI translate and teach you the English equivalent.
 - **Grammar Correction Cards** — See exactly what you said wrong and how to fix it.
 - **Scenario-Based Practice** — Choose topics like Job Interview, Travel, Business Meeting, and more.
 - **AI Tone Control** — Switch between Friendly, Professional, and Tough coaching styles.
 - **Word Bank** — Save new vocabulary from conversations for later review.
 - **Session Reports** — Get a detailed performance report after each practice session.
-- **Text-to-Speech** — Hear the AI read responses aloud for pronunciation practice.
+- **Text-to-Speech** — Hear the AI read responses aloud. Supports natural Indic voices (Hindi, Tamil, etc.) via Sarvam AI.
 - **Word of the Day** — Learn a new word every time you open the app.
 
 ### 💻 Coding Mode
@@ -37,15 +38,16 @@
 - **Run Code** — Execute your code right in the browser (JavaScript).
 
 ### 🤖 Multi-Provider AI Engine
-SpeakSmart supports **three AI backends** with intelligent auto-switching:
+SpeakSmart supports **multiple AI backends** with intelligent auto-switching:
 
 | Provider | Models | Cost | Best For |
 |----------|--------|------|----------|
 | **Gemini** | 2.5 Flash, 2.5 Pro, 3.0 Flash/Pro, 3.1 Pro | Free tier | Primary (recommended) |
+| **Sarvam AI** | **Sarvam-M (Free)**, Bulbul (TTS), Mayura (Translation) | **Free tokens** & Paid | Indic languages & Multilingual |
 | **OpenRouter** | Llama 3.3 70B, Gemini 2.0 Flash, Devstral 2 | Free models | Fallback & variety |
 | **Ollama** | Any local model (llama3, mistral, etc.) | Free (local) | Offline / privacy |
 
-> **Auto-Smart Mode**: When enabled, SpeakSmart automatically picks the best available provider, falling back to alternatives if one is rate-limited.
+> **Auto-Smart Mode**: When enabled, SpeakSmart automatically picks the best available provider. It now includes Sarvam-M as a high-performance free alternative for Indic reasoning.
 
 ---
 
@@ -60,10 +62,13 @@ SpeakSmart is **fully responsive** and designed mobile-first:
 - **PWA-Ready Structure** — Can be added to your home screen for an app-like experience.
 
 ### 📲 How to Use on Mobile
-1. Open the hosted URL in your mobile browser (Chrome, Safari, Firefox).
-2. Tap the **microphone** icon to start speaking.
-3. The AI will respond with corrections and conversation.
-4. Swipe up/down in the chat area to review your history.
+1. Open the hosted URL in your mobile browser.
+2. **For Voice Support**:
+   - **iOS (iPhone/iPad)**: Use **Safari** for full microphone support.
+   - **Android**: Chrome or Firefox work perfectly.
+3. Tap the **microphone** icon 🎙️ in the status area or chat footer.
+4. If you speak in an Indian language (e.g., Hindi), SpeakSmart will automatically translate it to English and respond!
+5. Swipe up/down in the chat area to review your history.
 
 > **Tip:** On Android Chrome, tap `⋮ → Add to Home Screen` for a native app feel.  
 > **Tip:** On iOS Safari, tap `Share → Add to Home Screen`.

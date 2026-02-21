@@ -169,6 +169,16 @@
             <div v-if="speechError" class="error-msg">
               <span class="emoji">⚠️</span> {{ speechError }}
             </div>
+
+            <div v-if="isInsecureContext" class="error-msg insecure-warning">
+              <span class="emoji">🔒</span> <strong>Mobile Mic Blocked:</strong> 
+              Browser requires HTTPS to use the microphone on mobile devices. 
+              Please test using <strong>localhost</strong> or <strong>HTTPS</strong>.
+            </div>
+
+            <div v-if="isIOS && !speechError" class="ios-hint">
+              <span class="emoji">💡</span> iPhone/iPad: Use <strong>Safari</strong> for the best microphone experience.
+            </div>
           </div>
 
           <div class="mic-controls">
@@ -310,7 +320,7 @@
             />
             <div class="input-actions">
               <MicButton :isListening="isListening" @toggle="toggleListening" minimal />
-              <button @click="submitText" class="btn-send" :disabled="!userInputText.trim()">
+              <button @click="submitText" class="btn-send" :disabled="!userInputText.trim() && !isListening">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                   <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                 </svg>
@@ -341,11 +351,15 @@ import { useOpenRouter } from '../composables/useOpenRouter';
 import { useSarvam } from '../composables/useSarvam';
 import scenariosData from '../data/scenarios.json';
 
-const { isListening, transcript, startListening, stopListening, error: speechError, language: micLanguage, setLanguage: setMicLanguage } = useSpeechRecognition();
+const { isListening, transcript, startListening, stopListening, error: speechError, language: micLanguage, setLanguage: setMicLanguage, isIOS } = useSpeechRecognition();
 const { chat, preferredProvider, activeProvider } = useAI();
 const { speak, isSpeaking, stopSpeaking } = useTextToSpeech();
 const { checkGrammar } = useGrammarCheck();
 const { translate, textToSpeech: sarvamTTS, isTranslating, apiKey: sarvamKey, setApiKey: setSarvamKey } = useSarvam();
+
+const isInsecureContext = computed(() => {
+  return !window.isSecureContext && window.location.hostname !== 'localhost';
+});
 
 const { geminiModel } = useGemini();
 const { openRouterModel } = useOpenRouter();
@@ -1403,6 +1417,16 @@ onMounted(() => {
   align-self: flex-end;
 }
 
+.ios-hint {
+  font-size: 0.65rem;
+  color: #fbbf24;
+  margin-top: 0.5rem;
+  padding: 0.4rem;
+  background: rgba(251, 191, 36, 0.05);
+  border-radius: 4px;
+  border: 1px solid rgba(251, 191, 36, 0.1);
+}
+
 @media (max-width: 768px) {
   .english-mode {
     height: 100%;
@@ -1522,7 +1546,21 @@ onMounted(() => {
     background: rgba(255,255,255,0.02);
   }
 
-  .mic-controls { display: none; }
+  /* Ensure microphone is accessible on mobile */
+  .mic-controls {
+    display: block;
+    margin-top: 0.5rem;
+  }
+  
+  /* Mic label might be too big for mobile side-by-side */
+  .mic-row {
+    padding: 0.4rem;
+    gap: 0.5rem;
+  }
+  
+  .mic-label { font-size: 0.7rem; }
+  .mic-hint { font-size: 0.55rem; }
+
   .message-wrapper { max-width: 92%; }
   .btn-wordbank, .btn-finish { font-size: 0.6rem; padding: 0.15rem 0.3rem; }
 
