@@ -66,6 +66,12 @@
                   <option value="openrouter/free">Auto-Free Router (Intelligent Pick)</option>
                 </select>
              </div>
+             
+             <label style="margin-top: 0.5rem;">Multilingual / Indic (Sarvam AI)</label>
+             <input v-model="inputSarvam" type="password" placeholder="Sarvam API Key" class="api-input" />
+             <p v-if="!inputSarvam" style="font-size: 0.65rem; color: var(--color-text-muted); margin-top: -0.25rem;">
+               Required for Indic translations & high-quality voices.
+             </p>
           </div>
           
            <div class="input-group">
@@ -120,9 +126,10 @@
         <button class="btn btn-primary" @click="saveKey">Start Learning</button>
         
         <div class="links">
-          <a href="https://aistudio.google.com" target="_blank">Get Gemini</a> |
-          <a href="https://openrouter.ai/keys" target="_blank">Get OpenRouter</a> |
-          <a href="https://ollama.com/" target="_blank">Download Ollama</a>
+          <a href="https://aistudio.google.com" target="_blank">Gemini</a> |
+          <a href="https://openrouter.ai/keys" target="_blank">OpenRouter</a> |
+          <a href="https://dashboard.sarvam.ai/" target="_blank">Sarvam</a> |
+          <a href="https://ollama.com/" target="_blank">Ollama</a>
         </div>
       </div>
 
@@ -150,6 +157,7 @@ import LogoIcon from './components/LogoIcon.vue';
 import { useGemini } from './composables/useGemini';
 import { useOpenRouter } from './composables/useOpenRouter';
 import { useOllama } from './composables/useOllama';
+import { useSarvam } from './composables/useSarvam';
 
 const currentMode = ref('english');
 const streak = ref(1); // Mock streak
@@ -169,6 +177,11 @@ const inputOpenRouter = ref(
   ''
 );
 const inputOpenRouterModel = ref(localStorage.getItem('openrouter_model') || 'meta-llama/llama-3.3-70b-instruct:free');
+const inputSarvam = ref(
+  localStorage.getItem('sarvam_api_key') || 
+  import.meta.env.VITE_SARVAM_API_KEY || 
+  ''
+);
 const inputOllamaUrl = ref(localStorage.getItem('ollama_url') || 'http://localhost:11434');
 const inputOllamaModel = ref(localStorage.getItem('ollama_model') || 'llama3');
 
@@ -179,9 +192,10 @@ const availableOllamaModels = ref([]);
 const { setApiKey: setGeminiKey, apiKey: geminiKey, setGeminiModel } = useGemini();
 const { setOpenRouterKey, apiKey: openRouterKey, setOpenRouterModel } = useOpenRouter();
 const { setOllamaConfig, ollamaModel, checkOllamaStatus, getAvailableModels } = useOllama();
+const { setApiKey: setSarvamKey, apiKey: sarvamKey } = useSarvam();
 
 const hasApiKey = computed(() => {
-  return !!geminiKey.value || !!openRouterKey.value || !!ollamaModel.value;
+  return !!geminiKey.value || !!openRouterKey.value || !!ollamaModel.value || !!sarvamKey.value;
 });
 
 const refreshOllama = async () => {
@@ -262,6 +276,10 @@ const saveKey = () => {
     setOpenRouterKey(inputOpenRouter.value.trim()); 
     setOpenRouterModel(inputOpenRouterModel.value);
     changed = true; 
+  }
+  if (inputSarvam.value.trim()) {
+    setSarvamKey(inputSarvam.value.trim());
+    changed = true;
   }
   
   setOllamaConfig(

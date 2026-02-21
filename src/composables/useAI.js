@@ -3,11 +3,13 @@ import { ref, computed } from 'vue';
 import { useGemini } from './useGemini';
 import { useOpenRouter } from './useOpenRouter';
 import { useOllama } from './useOllama';
+import { useSarvam } from './useSarvam';
 
 export function useAI() {
     const { chat: chatGemini, evaluateCode: evalGemini, apiKey: geminiKey, geminiModel, setGeminiModel } = useGemini();
     const { chatOpenRouter, apiKey: openRouterKey } = useOpenRouter();
     const { chatOllama, ollamaModel } = useOllama();
+    const { chat: chatSarvam, apiKey: sarvamKey } = useSarvam();
 
     const preferredProvider = ref(localStorage.getItem('preferred_ai_provider') || 'auto');
 
@@ -20,6 +22,7 @@ export function useAI() {
         if (preferredProvider.value !== 'auto') return preferredProvider.value;
         const available = [];
         if (geminiKey.value) available.push('Gemini');
+        if (sarvamKey.value) available.push('Sarvam');
         if (openRouterKey.value) available.push('OpenRouter');
         available.push('Ollama');
         return 'Auto (' + (available[0] || 'None') + ')';
@@ -30,26 +33,9 @@ export function useAI() {
 
         // 1. Try Preferred first if set
         if (preferredProvider.value === 'Gemini' && geminiKey.value) {
-            try {
-                return await chatGemini(prompt, history, systemPrompt);
-            } catch (e) {
-                lastError = e;
-                // Special Fallback for Gemini 429: Try Flash instead of Pro
-                if (e.status === 429 && geminiModel.value !== 'gemini-2.5-flash') {
-                    console.log('Gemini Rate Limit hit. Falling back to Flash model...');
-                    const originalModel = geminiModel.value;
-                    setGeminiModel('gemini-2.5-flash');
-                    try {
-                        const res = await chatGemini(prompt, history, systemPrompt);
-                        // Restore original model for future tries (it might be free again later)
-                        setGeminiModel(originalModel);
-                        return res;
-                    } catch (e2) {
-                        setGeminiModel(originalModel);
-                        lastError = e2;
-                    }
-                }
-            }
+            try { return await chatGemini(prompt, history, systemPrompt); } catch (e) { lastError = e; }
+        } else if (preferredProvider.value === 'Sarvam' && sarvamKey.value) {
+            try { return await chatSarvam(prompt, history, systemPrompt); } catch (e) { lastError = e; }
         } else if (preferredProvider.value === 'Ollama' && ollamaModel.value) {
             try { return await chatOllama(prompt, history, systemPrompt); } catch (e) { lastError = e; }
         } else if (preferredProvider.value === 'OpenRouter' && openRouterKey.value) {
@@ -63,7 +49,7 @@ export function useAI() {
                 if (response) return response;
             } catch (e) {
                 lastError = e;
-                // Again, if 429, try Flash as ultimate fallback
+                // Gemini Flash Fallback
                 if (e.status === 429 && geminiModel.value !== 'gemini-2.5-flash') {
                     const originalModel = geminiModel.value;
                     setGeminiModel('gemini-2.5-flash');
@@ -79,7 +65,15 @@ export function useAI() {
             }
         }
 
-        // ... rest of the logic
+        if (sarvamKey.value) {
+            try {
+                const response = await chatSarvam(prompt, history, systemPrompt);
+                if (response) return response;
+            } catch (e) {
+                lastError = e;
+            }
+        }
+
         try {
             const response = await chatOllama(prompt, history, systemPrompt);
             if (response) return response;

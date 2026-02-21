@@ -41,6 +41,7 @@
                   <select v-model="preferredProvider" class="scenario-select">
                     <option value="auto">🤖 Auto-Smart</option>
                     <option value="Gemini">💎 Gemini</option>
+                    <option value="Sarvam">🛰️ Sarvam (Free)</option>
                     <option value="Ollama">🏠 Ollama</option>
                     <option value="OpenRouter">🌐 OpenRouter</option>
                   </select>
@@ -76,6 +77,73 @@
                     <option value="openrouter/free">Auto-Free</option>
                   </select>
                 </div>
+
+                <div class="model-selector" v-if="preferredProvider === 'Sarvam'">
+                  <label>Sarvam Model</label>
+                  <select class="scenario-select" disabled>
+                    <option value="sarvam-m">Sarvam-M (Truly Free)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="selectors-row indicative-row" v-if="sarvamKey">
+                <!-- Existing Sarvam UI -->
+                <div class="indic-selector">
+                  <label>Translate to</label>
+                  <div class="row">
+                    <select v-model="selectedIndicLang" class="scenario-select">
+                      <option value="hi-IN">🇮🇳 Hindi</option>
+                      <option value="bn-IN">🇮🇳 Bengali</option>
+                      <option value="ta-IN">🇮🇳 Tamil</option>
+                      <option value="te-IN">🇮🇳 Telugu</option>
+                      <option value="kn-IN">🇮🇳 Kannada</option>
+                      <option value="gu-IN">🇮🇳 Gujarati</option>
+                      <option value="mr-IN">🇮🇳 Marathi</option>
+                      <option value="pa-IN">🇮🇳 Punjabi</option>
+                      <option value="ml-IN">🇮🇳 Malayalam</option>
+                      <option value="or-IN">🇮🇳 Odia</option>
+                    </select>
+                    <button @click="autoTranslate = !autoTranslate" class="btn-toggle-indic" :class="{ active: autoTranslate }" :title="autoTranslate ? 'Auto-translate is ON' : 'Auto-translate is OFF'">
+                      {{ autoTranslate ? 'Auto ON' : 'Auto OFF' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="selectors-row indicative-row" v-if="sarvamKey">
+                <div class="indic-selector">
+                  <label>I will speak in</label>
+                  <select v-model="micLanguage" class="scenario-select" @change="updateMicLanguage">
+                    <option value="en-US">🇺🇸 English</option>
+                    <option value="hi-IN">🇮🇳 Hindi</option>
+                    <option value="bn-IN">🇮🇳 Bengali</option>
+                    <option value="ta-IN">🇮🇳 Tamil</option>
+                    <option value="te-IN">🇮🇳 Telugu</option>
+                    <option value="kn-IN">🇮🇳 Kannada</option>
+                    <option value="gu-IN">🇮🇳 Gujarati</option>
+                    <option value="mr-IN">🇮🇳 Marathi</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="selectors-row indicative-row" v-else>
+                 <button @click="showSarvamSetup = true" class="btn-connect-sarvam">
+                   🛰️ Connect Sarvam AI (Indic Languages)
+                 </button>
+              </div>
+
+              <!-- Sarvam Setup Popup -->
+              <div v-if="showSarvamSetup" class="sarvam-mini-setup glass-panel">
+                <h4>🛰️ Sarvam AI Setup</h4>
+                <p>Unlock high-quality Indic translations & voices.</p>
+                <input v-model="sarvamInputKey" type="password" placeholder="Enter Sarvam API Key" class="scenario-select" style="width: 100%; margin: 10px 0;" />
+                <div class="row" style="display: flex; gap: 10px;">
+                  <button @click="saveSarvamKey" class="btn btn-primary" style="flex: 1; font-size: 0.8rem; padding: 5px;">Save</button>
+                  <button @click="showSarvamSetup = false" class="btn btn-clear" style="flex: 0.5; font-size: 0.8rem;">Cancel</button>
+                </div>
+                <p style="font-size: 0.6rem; margin-top: 10px; color: var(--color-text-muted);">
+                  Get a free key (₹1000 credits) at <a href="https://dashboard.sarvam.ai/" target="_blank" style="color: var(--color-primary);">sarvam.ai</a>
+                </p>
               </div>
 
               <div class="ollama-status-tiny" :class="{ online: ollamaOnline }">
@@ -188,6 +256,31 @@
               >
                 🔖
               </button>
+              <button 
+                v-if="msg.role === 'assistant' && sarvamKey" 
+                class="btn-translate-indic" 
+                @click="translateMessage(msg, index)"
+                :disabled="isTranslating"
+                title="Translate to Indic"
+              >
+                {{ msg.translatedContent ? '🔄' : '🌐' }}
+              </button>
+              <button 
+                v-if="msg.role === 'assistant' && msg.translatedContent" 
+                class="btn-speak-indic" 
+                @click="speakIndic(msg.translatedContent)"
+                title="Hear in Indic Voice"
+              >
+                🔊
+              </button>
+            </div>
+            
+            <div v-if="msg.translatedContent" class="indic-translation glass-panel">
+               <p>{{ msg.translatedContent }}</p>
+            </div>
+            
+            <div v-if="msg.originalIndic" class="user-original-indic">
+               {{ msg.originalIndic }}
             </div>
             
             <CorrectionCard 
@@ -245,12 +338,14 @@ import { useGrammarCheck } from '../composables/useGrammarCheck';
 import { useOllama } from '../composables/useOllama';
 import { useGemini } from '../composables/useGemini';
 import { useOpenRouter } from '../composables/useOpenRouter';
+import { useSarvam } from '../composables/useSarvam';
 import scenariosData from '../data/scenarios.json';
 
-const { isListening, transcript, startListening, stopListening, error: speechError } = useSpeechRecognition();
+const { isListening, transcript, startListening, stopListening, error: speechError, language: micLanguage, setLanguage: setMicLanguage } = useSpeechRecognition();
 const { chat, preferredProvider, activeProvider } = useAI();
 const { speak, isSpeaking, stopSpeaking } = useTextToSpeech();
 const { checkGrammar } = useGrammarCheck();
+const { translate, textToSpeech: sarvamTTS, isTranslating, apiKey: sarvamKey, setApiKey: setSarvamKey } = useSarvam();
 
 const { geminiModel } = useGemini();
 const { openRouterModel } = useOpenRouter();
@@ -263,6 +358,45 @@ const currentScenario = computed(() => scenarios.value.find(s => s.id === select
 const { ollamaModel, checkOllamaStatus, getAvailableModels } = useOllama();
 const ollamaOnline = ref(false);
 const availableOllamaModels = ref([]);
+
+// Sarvam States
+const selectedIndicLang = ref(localStorage.getItem('indic_lang') || 'hi-IN');
+const autoTranslate = ref(localStorage.getItem('auto_translate') === 'true');
+const showSarvamSetup = ref(false);
+const sarvamInputKey = ref('');
+
+const saveSarvamKey = () => {
+  if (sarvamInputKey.value.trim()) {
+    setSarvamKey(sarvamInputKey.value.trim());
+    showSarvamSetup.value = false;
+  }
+};
+
+watch(selectedIndicLang, (val) => localStorage.setItem('indic_lang', val));
+watch(autoTranslate, (val) => localStorage.setItem('auto_translate', val));
+
+const translateMessage = async (msg, index) => {
+  if (msg.translatedContent) {
+    msg.translatedContent = null;
+    return;
+  }
+  
+  try {
+    const translated = await translate(msg.content, 'en-IN', selectedIndicLang.value);
+    messages.value[index].translatedContent = translated;
+  } catch (err) {
+    alert("Translation failed: " + err.message);
+  }
+};
+
+const speakIndic = async (text) => {
+  try {
+    stopSpeaking();
+    await sarvamTTS(text, selectedIndicLang.value);
+  } catch (err) {
+    alert("Indic TTS failed: " + err.message);
+  }
+};
 
 const refreshOllamaStatus = async () => {
   ollamaOnline.value = await checkOllamaStatus();
@@ -405,17 +539,37 @@ const handleUserInput = async (text) => {
   statusMessage.value = 'Thinking...';
   avatarStatus.value = 'thinking';
   
-  const corrections = await checkGrammar(text);
+  let processedText = text;
+  let originalIndicText = null;
+
+  // 1. If user spoke in Indic, translate to English first
+  if (micLanguage.value !== 'en-US' && sarvamKey.value) {
+    statusMessage.value = 'Translating your speech...';
+    try {
+      originalIndicText = text;
+      processedText = await translate(text, micLanguage.value, 'en-IN');
+    } catch (e) {
+      console.error("Speech translation failed", e);
+    }
+  }
+  
+  const corrections = await checkGrammar(processedText);
   
   messages.value.push({
     role: 'user',
-    content: text,
+    content: processedText,
+    originalIndic: originalIndicText,
     corrections: corrections
   });
   scrollToBottom();
 
+  const finalPrompt = originalIndicText 
+    ? `The user said "${originalIndicText}" in ${micLanguage.value}. The translation is "${processedText}". 
+       If they are asking how to say this in English, explain it. Otherwise, respond naturally in English.`
+    : processedText;
+
   try {
-    const response = await chat(text, messages.value.slice(0, -1), systemPrompt.value);
+    const response = await chat(finalPrompt, messages.value.slice(0, -1), systemPrompt.value);
     if (response) {
       messages.value.push({
         role: 'assistant',
@@ -423,7 +577,7 @@ const handleUserInput = async (text) => {
       });
       avatarStatus.value = 'speaking';
       speak(response);
-      statusMessage.value = 'I am speaking...';
+      setIndicTranslation(response, messages.value.length - 1);
     }
   } catch (err) {
     statusMessage.value = 'Error: ' + err.message;
@@ -434,6 +588,10 @@ const handleUserInput = async (text) => {
   }
   
   scrollToBottom();
+};
+
+const updateMicLanguage = () => {
+  setMicLanguage(micLanguage.value);
 };
 
 const toggleListening = () => {
@@ -462,6 +620,17 @@ const greet = () => {
     });
     speak(msg);
     avatarStatus.value = 'speaking';
+  }
+};
+
+const setIndicTranslation = async (text, index) => {
+  if (autoTranslate.value && sarvamKey.value) {
+    try {
+      const translated = await translate(text, 'en-IN', selectedIndicLang.value);
+      messages.value[index].translatedContent = translated;
+    } catch (e) {
+      console.error("Auto-translate failed", e);
+    }
   }
 };
 
@@ -1111,6 +1280,129 @@ onMounted(() => {
   font-size: 1.5rem;
   cursor: pointer;
 }
+
+.indicative-row {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.indic-selector {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.indic-selector .row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-toggle-indic {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  color: var(--color-text-muted);
+  font-size: 0.65rem;
+  padding: 0 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.btn-toggle-indic.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.btn-translate-indic, .btn-speak-indic {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  opacity: 0.6;
+  transition: opacity 0.2s, transform 0.2s;
+  padding: 0 0.25rem;
+  margin-left: 0.25rem;
+}
+
+.btn-translate-indic:hover, .btn-speak-indic:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.indic-translation {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  color: #a5b4fc;
+  border-left: 3px solid var(--color-primary);
+  background: rgba(99, 102, 241, 0.05);
+  animation: slideIn 0.3s ease-out;
+  border-radius: 0 8px 8px 0;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.assistant .message-bubble {
+  padding-right: 3.5rem; /* Make room for save/translate/speak buttons */
+}
+
+
+.btn-connect-sarvam {
+  width: 100%;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px dashed var(--color-primary);
+  color: #a5b4fc;
+  padding: 0.5rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-connect-sarvam:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-style: solid;
+}
+
+.sarvam-mini-setup {
+  padding: 1rem;
+  margin-top: 0.5rem;
+  animation: slideIn 0.3s ease-out;
+  border: 1px solid var(--color-primary);
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.sarvam-mini-setup h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.8rem;
+  color: var(--color-primary);
+}
+
+.sarvam-mini-setup p {
+  font-size: 0.7rem;
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+
+.user-original-indic {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  max-width: fit-content;
+  align-self: flex-end;
+}
+
 @media (max-width: 768px) {
   .english-mode {
     height: 100%;
